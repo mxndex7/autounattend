@@ -109,6 +109,7 @@ Use esta opção se você quer distribuir uma ISO já pronta, sem depender de co
 
 ## Avisos importantes
 
+- **O instalador pula as verificações de TPM 2.0, Secure Boot e RAM mínima do Windows 11** (`LabConfig`). Isso permite instalar o Win11 em máquinas antigas, mas hardware fora dos requisitos fica sem suporte oficial da Microsoft e pode deixar de receber atualizações de recursos (novas versões do Windows). Avise o cliente na entrega.
 - **Senha provisória `1234` nas duas contas**: serve para a bancada, mas não pode ir para o cliente final sem troca.
 - **A remoção do Edge não é um processo 100% oficial/suportado pela Microsoft.** Funciona na prática (é a mesma técnica usada por diversas ferramentas de debloat), mas pode se comportar de forma diferente em alguma build específica do Windows. Teste em uma máquina antes de replicar em massa.
 - **A instalação do Office depende de internet durante a instalação** (é um download grande) e da ferramenta `winget`/download direto funcionarem — em caso de falha, o log fica em `C:\Windows\Setup\Scripts\unattend-05.log` na máquina instalada.
