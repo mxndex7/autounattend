@@ -21,7 +21,7 @@ Baseado no [unattend-generator do schneegans.de](https://schneegans.de/windows/u
 | **Bloatware (Xbox, Copilot, Cortana, Widgets, etc.)** | Removido |
 | **Telemetria e coleta de dados** | Reduzida: serviço DiagTrack desativado e política no nível mínimo que a edição permite (em Pro/Home o Windows mantém a telemetria básica obrigatória; o nível 0 só vale em Enterprise/Education) |
 | **Performance** | Serviços desnecessários desligados, plano de energia de alta performance, sem indexação de busca |
-| **Manutenção** | Limpeza automática de temporários (Storage Sense) + tarefa mensal de limpeza do sistema |
+| **Manutenção** | Limpeza automática de temporários (Storage Sense) |
 
 ### 🖥️ Experiência de uso
 - Instalação 100% desatendida: não pede chave de produto de forma bloqueante, não pede conta Microsoft, não mostra as telas de "personalizar sua experiência".
@@ -39,15 +39,15 @@ Baseado no [unattend-generator do schneegans.de](https://schneegans.de/windows/u
 
 **Recursos do Windows:** Fax e Digitalização, Reconhecimento de escrita à mão, Internet Explorer, Reconhecimento matemático, OneSync, Cliente OpenSSH, Gravador de Passos, Windows Hello Face (biometria facial).
 
-**Navegador:** Microsoft Edge — desinstalado de verdade (não só "liberado para remover"), incluindo o bloqueio da reinstalação automática pelo Edge Update.
+**Navegador:** Microsoft Edge — desinstalado de verdade (não só "liberado para remover"), com a reinstalação automática bloqueada por política. O Edge Update continua ativo porque também atualiza o WebView2 Runtime, usado por vários apps.
 
 **OneDrive:** Removido (atalho, instalador e entrada de inicialização automática).
 
-**Serviços do Windows desativados:** indexação de busca (WSearch), telemetria (DiagTrack), SysMain/Superfetch, Windows Error Reporting, P2P do Delivery Optimization, serviços do Xbox, demonstração de loja (RetailDemo), mapas offline (MapsBroker), carteira (WalletService), coletor de diagnóstico, compartilhamento de mídia (WMPNetworkSvc), telefonia (PhoneSvc), NFC/pagamentos (SEMgrSvc), Windows Insider, compartilhamento de conexão (ICS) e Registro Remoto.
+**Serviços do Windows desativados:** indexação de busca (WSearch), telemetria (DiagTrack), SysMain/Superfetch, Windows Error Reporting, P2P do Delivery Optimization, serviços do Xbox, demonstração de loja (RetailDemo), mapas offline (MapsBroker), carteira (WalletService), coletor de diagnóstico, compartilhamento de mídia (WMPNetworkSvc), telefonia (PhoneSvc), NFC/pagamentos (SEMgrSvc), Windows Insider e Registro Remoto. Indexação de busca (WSearch) e SysMain/Superfetch só são desativados se o disco do sistema for HDD.
 
 > Serviços que dependem do hardware específico de cada máquina (Bluetooth, Spooler de impressão, teclado touch, biometria) **não** foram tocados, já que este arquivo serve para instalações em máquinas variadas.
 
-**Outros:** hibernação/Fast Startup, Restauração do Sistema, Reserved Storage (~7 GB reservados pelo Windows).
+**Outros:** hibernação/Fast Startup.
 
 > O `Windows.old` **não é apagado automaticamente**: em instalação sem formatar o disco ele guarda os dados do cliente. Migre os dados e limpe depois (`cleanmgr` ou Configurações → Armazenamento).
 
@@ -59,7 +59,7 @@ Baseado no [unattend-generator do schneegans.de](https://schneegans.de/windows/u
 - **Microsoft Word, Excel e PowerPoint** — instalados via Office Deployment Tool oficial, **sem Access, Outlook, OneNote, Publisher, Teams ou OneDrive**, e **sem ativação** (fica por conta de quem for usar a máquina).
 - **Plano de energia "Alto desempenho"** — ativado automaticamente.
 - **Modo de Jogo (Game Mode)** — ativado por padrão para todo novo usuário.
-- **Tarefa de limpeza mensal** — roda o component cleanup do Windows (DISM) e limpa arquivos temporários todo mês, para o sistema não voltar a "engordar" com o tempo.
+- **Restauração do Sistema ligada** no disco C: (ponto de retorno barato para suporte).
 - **Storage Sense ativado** — limpa temporários e a lixeira automaticamente (não mexe na pasta Downloads).
 - **Active Hours dinâmico** — o Windows aprende o período em que a máquina está em uso e evita reiniciar sozinho nesse intervalo.
 - **Área de trabalho remota (RDP)** desligada (padrão seguro).
