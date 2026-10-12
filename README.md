@@ -28,7 +28,7 @@ Baseado no [unattend-generator do schneegans.de](https://schneegans.de/windows/u
 - Ao ligar pela primeira vez, o Windows já abre direto na área de trabalho, logado, com Chrome instalado e definido como padrão.
 - Menu Iniciar limpo (sem apps fixados, sem seção "Recomendados", sem anúncios).
 - Barra de tarefas alinhada à esquerda, sem campo de busca visível, sem Widgets.
-- Explorador de Arquivos mostra extensões, arquivos ocultos e o caminho completo na barra de título; menu de contexto clássico (estilo Windows 10).
+- Explorador de Arquivos mostra extensões e o caminho completo na barra de título; menu de contexto clássico (estilo Windows 10).
 - Instalação funciona mesmo em hardware "não suportado" oficialmente (sem TPM 2.0 / Secure Boot / pouca RAM).
 
 ---
@@ -59,6 +59,7 @@ Baseado no [unattend-generator do schneegans.de](https://schneegans.de/windows/u
 - **Microsoft Word, Excel e PowerPoint** — instalados via Office Deployment Tool oficial, **sem Access, Outlook, OneNote, Publisher, Teams ou OneDrive**, e **sem ativação** (fica por conta de quem for usar a máquina).
 - **Plano de energia "Alto desempenho"** — ativado automaticamente.
 - **Modo de Jogo (Game Mode)** — ativado por padrão para todo novo usuário.
+- **Nome do computador:** `Usuario` em todas as máquinas. Renomeie na entrega se mais de uma ficar na mesma rede.
 - **Restauração do Sistema ligada** no disco C: (ponto de retorno barato para suporte).
 - **Storage Sense ativado** — limpa temporários e a lixeira automaticamente (não mexe na pasta Downloads).
 - **Active Hours dinâmico** — o Windows aprende o período em que a máquina está em uso e evita reiniciar sozinho nesse intervalo.
@@ -112,7 +113,7 @@ Use esta opção se você quer distribuir uma ISO já pronta, sem depender de co
 - **O instalador pula as verificações de TPM 2.0, Secure Boot e RAM mínima do Windows 11** (`LabConfig`). Isso permite instalar o Win11 em máquinas antigas, mas hardware fora dos requisitos fica sem suporte oficial da Microsoft e pode deixar de receber atualizações de recursos (novas versões do Windows). Avise o cliente na entrega.
 - **Senha provisória `1234` nas duas contas**: serve para a bancada, mas não pode ir para o cliente final sem troca.
 - **A remoção do Edge não é um processo 100% oficial/suportado pela Microsoft.** Funciona na prática (é a mesma técnica usada por diversas ferramentas de debloat), mas pode se comportar de forma diferente em alguma build específica do Windows. Teste em uma máquina antes de replicar em massa.
-- **A instalação do Office depende de internet durante a instalação** (é um download grande) e da ferramenta `winget`/download direto funcionarem — em caso de falha, o log fica em `C:\Windows\Setup\Scripts\unattend-05.log` na máquina instalada.
+- **A instalação do Office baixa 2-3 GB no primeiro logon.** Para não depender da internet, pré-baixe: crie a pasta `Office` na raiz do pendrive (ao lado deste arquivo), coloque nela o `setup.exe` do Office Deployment Tool e o `OfficeConfiguration.xml` (copie o do XML), e rode `setup.exe /download OfficeConfiguration.xml` dentro dela. O script usa a primeira pasta `Office` com `setup.exe` e `Data` que achar em qualquer unidade; sem ela, baixa o `setup.exe` da CDN oficial e instala pela internet (espera a rede por até 3 minutos). Em caso de falha, o log fica em `C:\Windows\Setup\Scripts\unattend-05.log` na máquina instalada.
 - Este arquivo **não ativa** o Windows nem o Office — ele só automatiza a instalação e a configuração. A ativação de ambos continua sendo responsabilidade de quem usa a licença.
 - Teste sempre em uma máquina virtual antes de usar em um equipamento real.
 
