@@ -4,7 +4,7 @@ Arquivo de resposta (`autounattend.xml`) para automatizar a instalação do Wind
 
 Baseado no [unattend-generator do schneegans.de](https://schneegans.de/windows/unattend-generator/), com correções e vários ajustes manuais adicionais.
 
-> **Leia a seção [Avisos importantes](#-avisos-importantes) antes de usar.** Este arquivo desativa proteções (BitLocker, SmartScreen), cria uma conta administradora sem senha com login automático, e desinstala o Edge de forma não totalmente suportada pela Microsoft. É pensado para quem faz reinstalações frequentes (técnicos de TI, uso pessoal, VMs de teste) — avalie se cada ponto faz sentido para o seu caso antes de usar em produção.
+> **Leia a seção [Avisos importantes](#-avisos-importantes) antes de usar.** Este arquivo desativa proteções (BitLocker, SmartScreen), cria contas locais com a senha provisória `1234` (troque na entrega), e desinstala o Edge de forma não totalmente suportada pela Microsoft. É pensado para quem faz reinstalações frequentes (técnicos de TI, uso pessoal, VMs de teste) — avalie se cada ponto faz sentido para o seu caso antes de usar em produção.
 
 ---
 
@@ -13,11 +13,11 @@ Baseado no [unattend-generator do schneegans.de](https://schneegans.de/windows/u
 ### O que já vem pronto
 | Item | Detalhe |
 |---|---|
-| **Conta local** | Usuário `TI`, administrador, login automático, sem tela de conta Microsoft forçada |
+| **Contas locais** | `TI` (administrador, para o técnico) e `Cliente` (usuário padrão, para o cliente), ambas com senha provisória `1234`. Login automático só no primeiro logon (TI). Sem tela de conta Microsoft forçada |
 | **Idioma/região** | pt-BR (idioma, teclado ABNT2, fuso horário) |
 | **Navegador** | Google Chrome instalado e **definido como padrão** automaticamente |
 | **Office** | Word, Excel e PowerPoint instalados (sem ativação — veja avisos) |
-| **Microsoft Edge** | Completamente removido do sistema |
+| **Microsoft Edge** | Removido no primeiro logon, **somente se o Chrome tiver instalado com sucesso** (senão o Edge é mantido) |
 | **Bloatware (Xbox, Copilot, Cortana, Widgets, etc.)** | Removido |
 | **Telemetria e coleta de dados** | Desativada na maior parte |
 | **Performance** | Serviços desnecessários desligados, plano de energia de alta performance, sem indexação de busca |
@@ -47,21 +47,23 @@ Baseado no [unattend-generator do schneegans.de](https://schneegans.de/windows/u
 
 > Serviços que dependem do hardware específico de cada máquina (Bluetooth, Spooler de impressão, teclado touch, biometria) **não** foram tocados, já que este arquivo serve para instalações em máquinas variadas.
 
-**Outros:** hibernação/Fast Startup, Restauração do Sistema, Reserved Storage (~7 GB reservados pelo Windows), Windows.old (ao final da instalação).
+**Outros:** hibernação/Fast Startup, Restauração do Sistema, Reserved Storage (~7 GB reservados pelo Windows).
+
+> O `Windows.old` **não é apagado automaticamente**: em instalação sem formatar o disco ele guarda os dados do cliente. Migre os dados e limpe depois (`cleanmgr` ou Configurações → Armazenamento).
 
 ---
 
 ## O que foi adicionado/pré-configurado
 
-- **Google Chrome** — instalado silenciosamente e configurado como navegador padrão do sistema (associações de `.htm`, `.html`, `http` e `https`).
+- **Google Chrome** — instalado silenciosamente no primeiro logon (o script espera a rede por até 3 minutos, então a Wi-Fi da OOBE já deve estar conectada). Vira navegador padrão (`.htm`, `.html`, `http`, `https`) para as contas criadas depois, como `Cliente`; no perfil `TI`, que já existe nesse ponto, o padrão é escolhido manualmente.
 - **Microsoft Word, Excel e PowerPoint** — instalados via Office Deployment Tool oficial, **sem Access, Outlook, OneNote, Publisher, Teams ou OneDrive**, e **sem ativação** (fica por conta de quem for usar a máquina).
 - **Plano de energia "Ultimate Performance"** — ativado automaticamente.
 - **Modo de Jogo (Game Mode)** — ativado por padrão para todo novo usuário.
 - **Tarefa de limpeza mensal** — roda o component cleanup do Windows (DISM) e limpa arquivos temporários todo mês, para o sistema não voltar a "engordar" com o tempo.
 - **Storage Sense ativado** — limpa temporários e a lixeira automaticamente (não mexe na pasta Downloads).
 - **Active Hours dinâmico** — o Windows aprende o período em que a máquina está em uso e evita reiniciar sozinho nesse intervalo.
-- **Área de trabalho remota (RDP)** habilitada e liberada no firewall.
-- **Atualizações do Windows mais previsíveis** — atualizações de recursos (novas versões do Windows) adiadas por 60 dias, atualizações de segurança/qualidade por 4 dias, e sem trocar drivers automaticamente via Windows Update.
+- **Área de trabalho remota (RDP)** desligada (padrão seguro).
+- **Atualizações do Windows mais previsíveis** — atualizações de recursos (novas versões do Windows) adiadas por 60 dias, atualizações de segurança/qualidade por 4 dias. Drivers continuam vindo normalmente pelo Windows Update.
 
 ---
 
@@ -99,7 +101,7 @@ Use esta opção se você quer distribuir uma ISO já pronta, sem depender de co
 
 ## Antes de usar — o que revisar
 
-- **Nome/senha da conta**: por padrão o usuário é `TI`, administrador, **sem senha**, com login automático. Se a máquina vai ficar em rede ou for usada por terceiros, edite as tags `<UserAccounts>` e `<AutoLogon>` no arquivo e defina uma senha.
+- **Contas e senhas**: `TI` (administrador) e `Cliente` (usuário padrão), as duas com a senha provisória `1234`. `1234` é fácil de adivinhar: troque as senhas na entrega ao cliente (ou edite `<UserAccounts>` e `<AutoLogon>` no arquivo). O cliente deve usar `Cliente`, não `TI`.
 - **Chave de produto**: o arquivo usa uma chave genérica (`00000-00000-00000-00000-00000`) e deixa a tela de seleção de edição aparecer durante a instalação — insira sua chave real ali, ou edite a tag `<ProductKey>`.
 - **Licença do Office**: o Word/Excel/PowerPoint instalam sem ativação. É necessário ter uma licença Microsoft 365 ou do Office válida e ativar depois (Configurações → Conta → Ativar Office). Se o destino usa uma licença **perpétua** (Office 2021/2024, não assinatura), é preciso trocar o `Product ID` dentro do arquivo — os comentários no próprio XML (script `unattend-05.ps1`) explicam onde.
 - **Wi-Fi**: a instalação pede a senha da rede Wi-Fi normalmente durante a OOBE (não fica travado nisso, é só uma etapa interativa a mais se a máquina não tiver cabo de rede).
@@ -109,7 +111,7 @@ Use esta opção se você quer distribuir uma ISO já pronta, sem depender de co
 ## Avisos importantes
 
 - **BitLocker/criptografia de dispositivo fica desativada por padrão** e o **SmartScreen é desligado**. São trocas conscientes de segurança por praticidade/performance — se você precisa dessas proteções, remova essas linhas do arquivo antes de usar.
-- **Conta sem senha + login automático** é adequado para uso pessoal, bancada de testes ou máquinas de uma loja de assistência técnica — **não é recomendado** para notebooks que saem de casa ou máquinas em rede corporativa sem outra camada de proteção.
+- **Senha provisória `1234` nas duas contas**: serve para a bancada, mas não pode ir para o cliente final sem troca.
 - **A remoção do Edge não é um processo 100% oficial/suportado pela Microsoft.** Funciona na prática (é a mesma técnica usada por diversas ferramentas de debloat), mas pode se comportar de forma diferente em alguma build específica do Windows. Teste em uma máquina antes de replicar em massa.
 - **A instalação do Office depende de internet durante a instalação** (é um download grande) e da ferramenta `winget`/download direto funcionarem — em caso de falha, o log fica em `C:\Windows\Setup\Scripts\unattend-05.log` na máquina instalada.
 - Este arquivo **não ativa** o Windows nem o Office — ele só automatiza a instalação e a configuração. A ativação de ambos continua sendo responsabilidade de quem usa a licença.

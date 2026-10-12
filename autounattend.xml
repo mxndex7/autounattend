@@ -62,7 +62,21 @@
 	        aplicado como navegador padrão (.htm, .html, http, https) no primeiro logon de
 	        cada novo perfil de usuário.
 	     18) DefaultUser.ps1: Modo de Jogo (Game Mode) ativado por padrão para todo novo
-	        perfil de usuário. -->
+	        perfil de usuário.
+     19) Windows.old NAO e mais apagado no FirstLogon.ps1: em instalação sem formatar o
+        disco, Windows.old\Users guarda os dados do cliente. Limpar manualmente depois
+        de migrar os dados (cleanmgr ou Configurações > Armazenamento).
+     20) Chrome (unattend-01.ps1) e RemoveEdge.ps1 saíram do Specialize.ps1 e foram para o
+        FirstLogon.ps1 (elevado, depois da OOBE, com rede). unattend-01 espera a rede
+        (até 3 min) e instala só pelo instalador direto. O Edge só é removido se o
+        chrome.exe existir; OEMDefaultAssociations.xml só é aplicado nesse caso.
+        Efeito: a associação de navegador vale para contas criadas depois (Cliente);
+        o perfil TI já existe nesse ponto.
+     21) Contas: TI (administrador) com senha 1234 e nova conta Cliente (usuário padrão,
+        não administrador) com senha 1234. Login automático só no primeiro logon (TI).
+        Trocar as senhas na entrega. RDP agora fica explicitamente desligado.
+     22) unattend-03.ps1: removido o bloqueio de drivers via Windows Update (DriverSearching
+        e ExcludeWUDriversInQualityUpdate), que deixava máquina nova sem driver. -->
 	<!--https://schneegans.de/windows/unattend-generator/?LanguageMode=Unattended&UILanguage=pt-BR&Locale=pt-BR&Keyboard=00000416&GeoLocation=32&PEMode=Default&WindowsEditionMode=Interactive&ProcessorArchitecture=amd64&BypassRequirementsCheck=true&BypassNetworkCheck=true&ComputerNameMode=Random&TimeZoneMode=Implicit&UserAccountMode=Unattended&AccountName0=TI&AccountDisplayName0=&AccountPassword0=&AccountGroup0=Administrators&AutoLogonMode=Own&PasswordExpirationMode=Unlimited&LockoutMode=Default&HideFiles=HiddenSystem&ShowFileExtensions=true&ClassicContextMenu=true&HideInfoTip=true&LaunchToThisPC=true&ShowEndTask=true&TaskbarSearch=Hide&TaskbarIconsMode=Default&DisableWidgets=true&DisableBingResults=true&StartTilesMode=Default&StartPinsMode=Empty&DisableSmartScreen=true&EnableRemoteDesktop=true&AllowPowerShellScripts=true&PreventAutomaticReboot=true&DisableAppSuggestions=true&PreventDeviceEncryption=true&HideEdgeFre=true&DisableEdgeStartupBoost=true&MakeEdgeUninstallable=true&DisablePointerPrecision=true&DeleteWindowsOld=true&EffectsMode=Default&DeleteEdgeDesktopIcon=true&DesktopIconsMode=Default&StartFoldersMode=Default&CoreIsolationMode=Enabled&WifiMode=Interactive&ExpressSettings=DisableAll&LockKeysMode=Skip&StickyKeysMode=Default&ColorMode=Default&WallpaperMode=Default&LockScreenMode=Default&Remove3DViewer=true&RemoveBingSearch=true&RemoveCalculator=true&RemoveClipchamp=true&RemoveClock=true&RemoveCopilot=true&RemoveCortana=true&RemoveDevHome=true&RemoveWindowsHello=true&RemoveFamily=true&RemoveFeedbackHub=true&RemoveGameAssist=true&RemoveGetHelp=true&RemoveHandwriting=true&RemoveInternetExplorer=true&RemoveMailCalendar=true&RemoveMaps=true&RemoveMathInputPanel=true&RemoveMixedReality=true&RemoveZuneVideo=true&RemoveNews=true&RemoveOneDrive=true&RemoveOneNote=true&RemoveOneSync=true&RemoveOpenSSHClient=true&RemoveOutlook=true&RemovePaint=true&RemovePaint3D=true&RemovePeople=true&RemoveQuickAssist=true&RemoveSkype=true&RemoveSnippingTool=true&RemoveSolitaire=true&RemoveStepsRecorder=true&RemoveStickyNotes=true&RemoveTeams=true&RemoveGetStarted=true&RemoveToDo=true&RemoveWallet=true&RemoveWeather=true&RemoveFaxAndScan=true&RemoveXboxApps=true&RemoveYourPhone=true&SystemScript0=%24uri+%3D+%5Buri%5D%3A%3Anovo%28+%27https%3A%2F%2Fdl.google.com%2Fchrome%2Finstall%2Fchrome_installer.exe%27+%29%3B%0D%0A%24arquivo+%3D+%22%24env%3ATEMP%5C%7B0%7D%22+-f+%24uri.Segments%5B-1%5D%3B%0D%0A%5BSystem.Net.WebClient%5D%3A%3Anovo%28%29.DownloadFile%28+%24uri%2C+%24arquivo%29%3B%0D%0AStart-Process+-FilePath+%24file+-ArgumentList+%27%2Fsilent+%2Finstall%27+-Wait%3B%0D%0ARemove-Item+-LiteralPath+%24file+-ErrorAction+%27SilentlyContinue%27%3B&SystemScriptType0=Ps1&SystemScript1=%24out+%3D+%26+%22%24env%3Awindir%5CSystem32%5Cpowercfg.exe%22+%2FDuplicateScheme+%27e9a42b02-d5df-448d-aa00-03f14749eb61%27%3B%0D%0Ase%28+%24out+-match+%27%5Cs%28%5Ba-f0-9-%5D%7B36%7D%29%5Cs%27+%29+%7B%0D%0A++++%26+%22%24env%3Awindir%5CSystem32%5Cpowercfg.exe%22+%2FSetActive+%24Matches%5B1%5D%3B%0D%0A%7D+sen%C3%A3o+%7B%0D%0A++++%27N%C3%A3o+foi+poss%C3%ADvel+habilitar+o+esquema+de+energia+Ultimate+Performance.%27+%7C+Aviso+de+escrita%3B%0D%0A%7D&SystemScriptType1=Ps1&AppLockerMode=Skip-->
 	<settings pass="offlineServicing"></settings>
 	<settings pass="windowsPE">
@@ -138,7 +152,16 @@
 						<DisplayName></DisplayName>
 						<Group>Administrators</Group>
 						<Password>
-							<Value></Value>
+							<Value>1234</Value>
+							<PlainText>true</PlainText>
+						</Password>
+					</LocalAccount>
+					<LocalAccount wcm:action="add">
+						<Name>Cliente</Name>
+						<DisplayName>Cliente</DisplayName>
+						<Group>Users</Group>
+						<Password>
+							<Value>1234</Value>
 							<PlainText>true</PlainText>
 						</Password>
 					</LocalAccount>
@@ -149,7 +172,7 @@
 				<Enabled>true</Enabled>
 				<LogonCount>1</LogonCount>
 				<Password>
-					<Value></Value>
+					<Value>1234</Value>
 					<PlainText>true</PlainText>
 				</Password>
 			</AutoLogon>
@@ -549,21 +572,32 @@ function Test-ChromeInstalled {
 	(Test-Path -LiteralPath "${env:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe");
 }
 
-if( -not ( Test-ChromeInstalled ) ) {
-	$winget = Get-Command -Name 'winget.exe' -ErrorAction 'SilentlyContinue';
-	if( $winget ) {
+function Wait-Network {
+	for( $i = 0; $i -lt 36; $i++ ) {
 		try {
-			&amp; $winget.Source install --id 'Google.Chrome' --scope machine --silent --accept-package-agreements --accept-source-agreements --disable-interactivity *&gt; $null;
+			if( [System.Net.Dns]::GetHostAddresses( 'dl.google.com' ) ) {
+				return $true;
+			}
 		} catch {}
+		Start-Sleep -Seconds 5;
 	}
+	return $false;
 }
 
 if( -not ( Test-ChromeInstalled ) ) {
-	$uri = [uri]::new( 'https://dl.google.com/chrome/install/chrome_installer.exe' );
-	$arquivo = "$env:TEMP\{0}" -f $uri.Segments[-1];
-	[System.Net.WebClient]::new().DownloadFile( $uri, $arquivo );
-	Start-Process -FilePath $arquivo -ArgumentList '/silent /install --system-level' -Wait;
-	Remove-Item -LiteralPath $arquivo -ErrorAction 'SilentlyContinue';
+	if( -not ( Wait-Network ) ) {
+		'Sem rede apos 3 minutos; Chrome nao foi instalado.';
+		return;
+	}
+	try {
+		$uri = [uri]::new( 'https://dl.google.com/chrome/install/chrome_installer.exe' );
+		$arquivo = "$env:TEMP\{0}" -f $uri.Segments[-1];
+		[System.Net.WebClient]::new().DownloadFile( $uri, $arquivo );
+		Start-Process -FilePath $arquivo -ArgumentList '/silent /install --system-level' -Wait;
+		Remove-Item -LiteralPath $arquivo -ErrorAction 'SilentlyContinue';
+	} catch {
+		$_;
+	}
 }
 		</File>
 		<File path="C:\Windows\Setup\Scripts\OEMDefaultAssociations.xml">
@@ -638,10 +672,6 @@ reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /v DeferFea
 reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /v DeferFeatureUpdatesPeriodInDays /t REG_DWORD /d 60 /f;
 reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /v DeferQualityUpdates /t REG_DWORD /d 1 /f;
 reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /v DeferQualityUpdatesPeriodInDays /t REG_DWORD /d 4 /f;
-
-reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DriverSearching" /v DontSearchWindowsUpdate /t REG_DWORD /d 1 /f;
-reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DriverSearching" /v DontPromptForWindowsUpdate /t REG_DWORD /d 1 /f;
-reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /v ExcludeWUDriversInQualityUpdate /t REG_DWORD /d 1 /f;
 
 $servicesToDisable = @(
 	'XblAuthManager';
@@ -797,8 +827,7 @@ $scripts = @(
 		reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\Systray" /v HideSystray /t REG_DWORD /d 1 /f;
 	};
 	{
-		netsh.exe advfirewall firewall set rule group="@FirewallAPI.dll,-28752" new enable=Yes;
-		reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f;
+		reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 1 /f;
 	};
 	{
 		Remove-Item -LiteralPath 'C:\Users\Public\Desktop\Microsoft Edge.lnk' -ErrorAction 'SilentlyContinue' -Verbose;
@@ -836,16 +865,7 @@ $scripts = @(
 		&amp; 'C:\Windows\Setup\Scripts\MakeEdgeUninstallable.ps1';
 	};
 	{
-		&amp; 'C:\Windows\Setup\Scripts\RemoveEdge.ps1';
-	};
-	{
 		&amp; 'C:\Windows\Setup\Scripts\SetStartPins.ps1';
-	};
-	{
-		&amp; 'C:\Windows\Setup\Scripts\unattend-01.ps1';
-	};
-	{
-		Copy-Item -LiteralPath 'C:\Windows\Setup\Scripts\OEMDefaultAssociations.xml' -Destination 'C:\Windows\System32\OEMDefaultAssociations.xml' -Force;
 	};
 	{
 		&amp; 'C:\Windows\Setup\Scripts\unattend-02.ps1';
@@ -1031,10 +1051,18 @@ $scripts = @(
 		Set-ItemProperty -LiteralPath 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name 'AutoLogonCount' -Type 'DWord' -Force -Value 0;
 	};
 	{
-		if( Test-Path -LiteralPath 'C:\Windows.old' ) {
-			cmd.exe /c 'takeown /F C:\Windows.old /R /A /D Y >nul 2&gt;&amp;1';
-			cmd.exe /c 'icacls C:\Windows.old /reset /T /C /Q >nul 2&gt;&amp;1';
-			cmd.exe /c 'rd /s /q C:\Windows.old';
+		&amp; 'C:\Windows\Setup\Scripts\unattend-01.ps1';
+	};
+	{
+		$chrome = @(
+			"${env:ProgramFiles}\Google\Chrome\Application\chrome.exe";
+			"${env:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe";
+		) | Where-Object -FilterScript { Test-Path -LiteralPath $_ };
+		if( $chrome ) {
+			Copy-Item -LiteralPath 'C:\Windows\Setup\Scripts\OEMDefaultAssociations.xml' -Destination 'C:\Windows\System32\OEMDefaultAssociations.xml' -Force;
+			&amp; 'C:\Windows\Setup\Scripts\RemoveEdge.ps1';
+		} else {
+			'Chrome nao esta instalado: Edge mantido e associacao de navegador nao aplicada.';
 		}
 	};
 	{
