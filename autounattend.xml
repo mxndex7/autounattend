@@ -80,6 +80,13 @@
         /StartComponentCleanup; tarefa MonthlyCleanup removida (o Windows e o Storage Sense já
         fazem isso). WSearch e SysMain só são desativados se o disco C: for HDD. RemoveEdge.ps1
         mantém o Edge Update ativo (atualiza o WebView2 Runtime) e só bloqueia o Edge.
+	     25) Otimização de RAM/uso: transparência e animações desligadas no perfil padrão;
+	        svchost unido (SvcHostSplitThresholdInKB) só com RAM até 8 GB; hibernação e Fast
+	        Startup desligados só em SSD; mais serviços (dmwappushservice, WpcMonSvc, TrkWks,
+	        SSDPSRV, upnphost, CDPSvc/CDPUserSvc) e tarefas agendadas desativados; políticas de
+	        Spotlight, OneDrive, PushToInstall, OneSettings, GameDVR e AdvertisingInfo.
+	        Removidos LetAppsRunInBackground=2 (quebrava notificações de apps da Store) e
+	        AUOptions=4 (já é o padrão e mantinha o aviso de gerenciado pela organização).
 	     24) Médios: arquivos ocultos voltam ao padrão (não visíveis); nome do computador fixo
 	        "Usuario"; Office (unattend-05.ps1) passou do UserOnce para o FirstLogon.ps1 (elevado,
 	        sem UAC), usa a pasta Office pré-baixada se existir em qualquer unidade e baixa o
@@ -566,20 +573,32 @@ if( -not ( Test-ChromeInstalled ) ) {
 &amp; "$env:windir\System32\powercfg.exe" /SetActive '8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c';
 		</File>
 		<File path="C:\Windows\Setup\Scripts\unattend-03.ps1">
-&lt;# Desempenho extra: hiberna&#xE7;&#xE3;o/Fast Startup, indexa&#xE7;&#xE3;o de busca, DiagTrack, SysMain,
+&lt;# Desempenho extra: hiberna&#xE7;&#xE3;o/Fast Startup (s&#xF3; em SSD), svchost unido (RAM at&#xE9; 8 GB), indexa&#xE7;&#xE3;o de busca, DiagTrack, SysMain,
    Delivery Optimization, Windows Error Reporting, tarefas de telemetria/CEIP,
    apps em segundo plano, timestamp de &#xFA;ltimo acesso do NTFS, telemetria (pol&#xED;tica),
    Activity Feed/Timeline, Recall/AI e caminhos longos. #&gt;
-
-powercfg.exe /hibernate off;
-reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power" /v HiberbootEnabled /t REG_DWORD /d 0 /f;
-
-reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\DiagTrack" /v Start /t REG_DWORD /d 4 /f;
 
 $isHdd = $false;
 try {
 	$isHdd = ( Get-Partition -DriveLetter 'C' | Get-Disk | Get-PhysicalDisk ).MediaType -eq 'HDD';
 } catch {}
+
+$ramGB = 0;
+try {
+	$ramGB = ( Get-CimInstance -ClassName 'Win32_ComputerSystem' ).TotalPhysicalMemory / 1GB;
+} catch {}
+
+if( -not $isHdd ) {
+	powercfg.exe /hibernate off;
+	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power" /v HiberbootEnabled /t REG_DWORD /d 0 /f;
+}
+
+if( $ramGB -gt 0 -and $ramGB -le 8.5 ) {
+	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control" /v SvcHostSplitThresholdInKB /t REG_DWORD /d 67108864 /f;
+}
+
+reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\DiagTrack" /v Start /t REG_DWORD /d 4 /f;
+
 if( $isHdd ) {
 	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\WSearch" /v Start /t REG_DWORD /d 4 /f;
 	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\SysMain" /v Start /t REG_DWORD /d 4 /f;
@@ -589,8 +608,6 @@ reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization" /v D
 
 reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\WerSvc" /v Start /t REG_DWORD /d 4 /f;
 reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\Windows Error Reporting" /v Disabled /t REG_DWORD /d 1 /f;
-
-reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy" /v LetAppsRunInBackground /t REG_DWORD /d 2 /f;
 
 fsutil.exe behavior set disablelastaccess 1;
 
@@ -610,6 +627,17 @@ reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Explorer" /v DisableSugges
 reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\CloudContent" /v DisableTailoredExperiencesWithDiagnosticData /t REG_DWORD /d 1 /f;
 reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /v EnableDynamicContentInWSB /t REG_DWORD /d 0 /f;
 reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v DoNotShowFeedbackNotifications /t REG_DWORD /d 1 /f;
+reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v DisableOneSettingsDownloads /t REG_DWORD /d 1 /f;
+
+reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\CloudContent" /v DisableWindowsSpotlightFeatures /t REG_DWORD /d 1 /f;
+reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\CloudContent" /v DisableSpotlightCollectionOnDesktop /t REG_DWORD /d 1 /f;
+reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\CloudContent" /v DisableCloudOptimizedContent /t REG_DWORD /d 1 /f;
+reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\CloudContent" /v DisableThirdPartySuggestions /t REG_DWORD /d 1 /f;
+
+reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\OneDrive" /v DisableFileSyncNGSC /t REG_DWORD /d 1 /f;
+reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\PushToInstall" /v DisablePushToInstall /t REG_DWORD /d 1 /f;
+reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\GameDVR" /v AllowGameDVR /t REG_DWORD /d 0 /f;
+reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\AdvertisingInfo" /v DisabledByGroupPolicy /t REG_DWORD /d 1 /f;
 
 
 $servicesToDisable = @(
@@ -626,6 +654,13 @@ $servicesToDisable = @(
 	'SEMgrSvc';
 	'wisvc';
 	'RemoteRegistry';
+	'dmwappushservice';
+	'WpcMonSvc';
+	'TrkWks';
+	'SSDPSRV';
+	'upnphost';
+	'CDPSvc';
+	'CDPUserSvc';
 );
 foreach( $svc in $servicesToDisable ) {
 	reg.exe add "HKLM\SYSTEM\CurrentControlSet\Services\$svc" /v Start /t REG_DWORD /d 4 /f;
@@ -640,6 +675,14 @@ $tasks = @(
 	'\Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector';
 	'\Microsoft\Windows\Feedback\Siuf\DmClient';
 	'\Microsoft\Windows\Feedback\Siuf\DmClientOnScenarioDownload';
+	'\Microsoft\Windows\Application Experience\StartupAppTask';
+	'\Microsoft\Windows\Application Experience\PcaPatchDbTask';
+	'\Microsoft\Windows\Windows Error Reporting\QueueReporting';
+	'\Microsoft\Windows\Maps\MapsUpdateTask';
+	'\Microsoft\Windows\Maps\MapsToastTask';
+	'\Microsoft\Windows\SettingSync\BackgroundUploadTask';
+	'\Microsoft\Windows\SettingSync\NetworkStateChangeTask';
+	'\Microsoft\Windows\Device Information\Device';
 );
 foreach( $task in $tasks ) {
 	schtasks.exe /Change /TN $task /Disable *&gt; $null;
@@ -799,7 +842,6 @@ $scripts = @(
 		Set-ExecutionPolicy -Scope 'LocalMachine' -ExecutionPolicy 'RemoteSigned' -Force;
 	};
 	{
-		reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v AUOptions /t REG_DWORD /d 4 /f;
 		reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v NoAutoRebootWithLoggedOnUsers /t REG_DWORD /d 1 /f;
 	};
 	{
@@ -911,6 +953,12 @@ $scripts = @(
 	};
 	{
 		reg.exe add "HKU\DefaultUser\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v TaskbarAl /t REG_DWORD /d 0 /f;
+	};
+	{
+		reg.exe add "HKU\DefaultUser\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" /v EnableTransparency /t REG_DWORD /d 0 /f;
+		reg.exe add "HKU\DefaultUser\Control Panel\Desktop\WindowMetrics" /v MinAnimate /t REG_SZ /d 0 /f;
+		reg.exe add "HKU\DefaultUser\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v TaskbarAnimations /t REG_DWORD /d 0 /f;
+		reg.exe add "HKU\DefaultUser\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" /v VisualFXSetting /t REG_DWORD /d 3 /f;
 	};
 	{
 		reg.exe add "HKU\DefaultUser\Software\Microsoft\Windows\CurrentVersion\Explorer\CabinetState" /v FullPath /t REG_DWORD /d 1 /f;

@@ -43,11 +43,11 @@ Baseado no [unattend-generator do schneegans.de](https://schneegans.de/windows/u
 
 **OneDrive:** Removido (atalho, instalador e entrada de inicialização automática).
 
-**Serviços do Windows desativados:** indexação de busca (WSearch), telemetria (DiagTrack), SysMain/Superfetch, Windows Error Reporting, P2P do Delivery Optimization, serviços do Xbox, demonstração de loja (RetailDemo), mapas offline (MapsBroker), carteira (WalletService), coletor de diagnóstico, compartilhamento de mídia (WMPNetworkSvc), telefonia (PhoneSvc), NFC/pagamentos (SEMgrSvc), Windows Insider e Registro Remoto. Indexação de busca (WSearch) e SysMain/Superfetch só são desativados se o disco do sistema for HDD.
+**Serviços do Windows desativados:** indexação de busca (WSearch), telemetria (DiagTrack), SysMain/Superfetch, Windows Error Reporting, P2P do Delivery Optimization, serviços do Xbox, push de telemetria (dmwappushservice), controle parental (WpcMonSvc), rastreamento de links (TrkWks), descoberta SSDP/UPnP e Plataforma de Dispositivos Conectados (CDPSvc, usada pelo compartilhamento por proximidade), demonstração de loja (RetailDemo), mapas offline (MapsBroker), carteira (WalletService), coletor de diagnóstico, compartilhamento de mídia (WMPNetworkSvc), telefonia (PhoneSvc), NFC/pagamentos (SEMgrSvc), Windows Insider e Registro Remoto. Indexação de busca (WSearch) e SysMain/Superfetch só são desativados se o disco do sistema for HDD.
 
 > Serviços que dependem do hardware específico de cada máquina (Bluetooth, Spooler de impressão, teclado touch, biometria) **não** foram tocados, já que este arquivo serve para instalações em máquinas variadas.
 
-**Outros:** hibernação/Fast Startup.
+**Outros:** hibernação e Fast Startup desligados apenas em SSD (em HDD o Fast Startup acelera o boot). Com 8 GB de RAM ou menos, os serviços do Windows são agrupados em menos processos `svchost` (menos RAM; em contrapartida, se um serviço cair pode derrubar outros do mesmo grupo). Transparência e animações do Windows vêm desligadas.
 
 > O `Windows.old` **não é apagado automaticamente**: em instalação sem formatar o disco ele guarda os dados do cliente. Migre os dados e limpe depois (`cleanmgr` ou Configurações → Armazenamento).
 
