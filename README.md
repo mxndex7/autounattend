@@ -1,10 +1,10 @@
 # autounattend.xml — Windows 10/11 limpo e otimizado
 
-Arquivo de resposta (`autounattend.xml`) para automatizar a instalação do Windows 10 ou 11, já saindo do zero **sem bloatware, sem telemetria desnecessária, mais rápido e com os apps essenciais pré-instalados**. Você não precisa clicar em nada durante a instalação — inclusive o assistente de conta Microsoft, anúncios do menu Iniciar e a maior parte da coleta de dados do Windows.
+Arquivo de resposta (`autounattend.xml`) para automatizar a instalação do Windows 10 ou 11, já saindo do zero **sem bloatware, com a telemetria reduzida, mais rápido e com os apps essenciais pré-instalados**. Você não precisa clicar em nada durante a instalação — inclusive o assistente de conta Microsoft, anúncios do menu Iniciar e a maior parte da coleta de dados do Windows.
 
 Baseado no [unattend-generator do schneegans.de](https://schneegans.de/windows/unattend-generator/), com correções e vários ajustes manuais adicionais.
 
-> **Leia a seção [Avisos importantes](#-avisos-importantes) antes de usar.** Este arquivo desativa proteções (BitLocker, SmartScreen), cria contas locais com a senha provisória `1234` (troque na entrega), e desinstala o Edge de forma não totalmente suportada pela Microsoft. É pensado para quem faz reinstalações frequentes (técnicos de TI, uso pessoal, VMs de teste) — avalie se cada ponto faz sentido para o seu caso antes de usar em produção.
+> **Leia a seção [Avisos importantes](#-avisos-importantes) antes de usar.** Este arquivo cria contas locais com a senha provisória `1234` (troque na entrega), e desinstala o Edge de forma não totalmente suportada pela Microsoft. É pensado para quem faz reinstalações frequentes (técnicos de TI, uso pessoal, VMs de teste) — avalie se cada ponto faz sentido para o seu caso antes de usar em produção.
 
 ---
 
@@ -19,7 +19,7 @@ Baseado no [unattend-generator do schneegans.de](https://schneegans.de/windows/u
 | **Office** | Word, Excel e PowerPoint instalados (sem ativação — veja avisos) |
 | **Microsoft Edge** | Removido no primeiro logon, **somente se o Chrome tiver instalado com sucesso** (senão o Edge é mantido) |
 | **Bloatware (Xbox, Copilot, Cortana, Widgets, etc.)** | Removido |
-| **Telemetria e coleta de dados** | Desativada na maior parte |
+| **Telemetria e coleta de dados** | Reduzida: serviço DiagTrack desativado e política no nível mínimo que a edição permite (em Pro/Home o Windows mantém a telemetria básica obrigatória; o nível 0 só vale em Enterprise/Education) |
 | **Performance** | Serviços desnecessários desligados, plano de energia de alta performance, sem indexação de busca |
 | **Manutenção** | Limpeza automática de temporários (Storage Sense) + tarefa mensal de limpeza do sistema |
 
@@ -35,9 +35,9 @@ Baseado no [unattend-generator do schneegans.de](https://schneegans.de/windows/u
 
 ## O que foi removido
 
-**Apps/UWP (Store):** Visualizador 3D, Pesquisa Bing, Calculadora, Clipchamp, Alarmes e Relógio, Copilot, Cortana, Widgets, "Office" promocional (MicrosoftOfficeHub), Gravador de Voz, Vincular ao Celular (Cross Device), Dev Home, Segurança da Família, Central de Feedback, Edge Game Assist, Obter Ajuda, Introdução, E-mail e Calendário, Mapas, Mixed Reality Portal, Notícias/Bing News, OneNote (app), novo Outlook, Paint, Contatos, Assistência Rápida, Skype, Ferramenta de Captura, Paciência, Notas Adesivas, Teams, Microsoft To Do, Carteira, Clima, todo o pacote Xbox (app, overlays, identidade, gaming app), Seu Celular, Filmes e TV.
+**Apps/UWP (Store):** Visualizador 3D, Pesquisa Bing, Calculadora, Clipchamp, Alarmes e Relógio, Copilot, Cortana, Widgets, "Office" promocional (MicrosoftOfficeHub), Gravador de Voz, Vincular ao Celular (Cross Device), Dev Home, Segurança da Família, Central de Feedback, Edge Game Assist, Obter Ajuda, Introdução, E-mail e Calendário, Mapas, Mixed Reality Portal, Notícias/Bing News, OneNote (app), novo Outlook, Paint, Contatos, Assistência Rápida, Skype, Paciência, Notas Adesivas, Teams, Microsoft To Do, Carteira, Clima, todo o pacote Xbox (app, overlays, identidade, gaming app), Seu Celular, Filmes e TV.
 
-**Recursos do Windows:** Fax e Digitalização, Reconhecimento de escrita à mão, Internet Explorer, Reconhecimento matemático, OneSync, Cliente OpenSSH, Gravador de Passos, Windows Hello Face (biometria facial), recurso legado do Snipping Tool.
+**Recursos do Windows:** Fax e Digitalização, Reconhecimento de escrita à mão, Internet Explorer, Reconhecimento matemático, OneSync, Cliente OpenSSH, Gravador de Passos, Windows Hello Face (biometria facial).
 
 **Navegador:** Microsoft Edge — desinstalado de verdade (não só "liberado para remover"), incluindo o bloqueio da reinstalação automática pelo Edge Update.
 
@@ -57,19 +57,18 @@ Baseado no [unattend-generator do schneegans.de](https://schneegans.de/windows/u
 
 - **Google Chrome** — instalado silenciosamente no primeiro logon (o script espera a rede por até 3 minutos, então a Wi-Fi da OOBE já deve estar conectada). Vira navegador padrão (`.htm`, `.html`, `http`, `https`) para as contas criadas depois, como `Cliente`; no perfil `TI`, que já existe nesse ponto, o padrão é escolhido manualmente.
 - **Microsoft Word, Excel e PowerPoint** — instalados via Office Deployment Tool oficial, **sem Access, Outlook, OneNote, Publisher, Teams ou OneDrive**, e **sem ativação** (fica por conta de quem for usar a máquina).
-- **Plano de energia "Ultimate Performance"** — ativado automaticamente.
+- **Plano de energia "Alto desempenho"** — ativado automaticamente.
 - **Modo de Jogo (Game Mode)** — ativado por padrão para todo novo usuário.
 - **Tarefa de limpeza mensal** — roda o component cleanup do Windows (DISM) e limpa arquivos temporários todo mês, para o sistema não voltar a "engordar" com o tempo.
 - **Storage Sense ativado** — limpa temporários e a lixeira automaticamente (não mexe na pasta Downloads).
 - **Active Hours dinâmico** — o Windows aprende o período em que a máquina está em uso e evita reiniciar sozinho nesse intervalo.
 - **Área de trabalho remota (RDP)** desligada (padrão seguro).
-- **Atualizações do Windows mais previsíveis** — atualizações de recursos (novas versões do Windows) adiadas por 60 dias, atualizações de segurança/qualidade por 4 dias. Drivers continuam vindo normalmente pelo Windows Update.
 
 ---
 
 ## Privacidade
 
-Desativados: telemetria (nível de política e serviço), ID de publicidade, Histórico de Atividades, experiências personalizadas com base em diagnóstico, destaques do Bing na busca, notificações de feedback ("Como está sua experiência?"), sugestões de apps/conteúdo patrocinado no Menu Iniciar, sugestões da caixa de pesquisa, SmartScreen (Explorer e Defender), e a política que bloqueia a análise de dados do Recall/IA em hardware Copilot+.
+Desativados: telemetria (serviço DiagTrack desativado e política no nível mínimo da edição; não é desligamento total em Pro/Home), ID de publicidade, Histórico de Atividades, experiências personalizadas com base em diagnóstico, destaques do Bing na busca, notificações de feedback ("Como está sua experiência?"), sugestões de apps/conteúdo patrocinado no Menu Iniciar, sugestões da caixa de pesquisa, e a política que bloqueia a análise de dados do Recall/IA em hardware Copilot+.
 
 ---
 
@@ -110,7 +109,6 @@ Use esta opção se você quer distribuir uma ISO já pronta, sem depender de co
 
 ## Avisos importantes
 
-- **BitLocker/criptografia de dispositivo fica desativada por padrão** e o **SmartScreen é desligado**. São trocas conscientes de segurança por praticidade/performance — se você precisa dessas proteções, remova essas linhas do arquivo antes de usar.
 - **Senha provisória `1234` nas duas contas**: serve para a bancada, mas não pode ir para o cliente final sem troca.
 - **A remoção do Edge não é um processo 100% oficial/suportado pela Microsoft.** Funciona na prática (é a mesma técnica usada por diversas ferramentas de debloat), mas pode se comportar de forma diferente em alguma build específica do Windows. Teste em uma máquina antes de replicar em massa.
 - **A instalação do Office depende de internet durante a instalação** (é um download grande) e da ferramenta `winget`/download direto funcionarem — em caso de falha, o log fica em `C:\Windows\Setup\Scripts\unattend-05.log` na máquina instalada.

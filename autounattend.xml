@@ -2,7 +2,7 @@
 <unattend xmlns="urn:schemas-microsoft-com:unattend" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State">
 	<!-- EDITADO MANUALMENTE em relação ao gerado pelo unattend-generator:
 	     1) unattend-01.ps1 (instalação silenciosa do Chrome) e unattend-02.ps1 (ativação do
-	        plano de energia Ultimate Performance) tinham código PowerShell traduzido para
+	        plano de energia) tinham código PowerShell traduzido para
 	        português por engano ("novo" em vez de "new()", "se"/"senão" em vez de "if"/"else",
 	        "Aviso de escrita" em vez de "Write-Warning") e variável $file inexistente — corrigido.
 	     2) unattend-03.ps1 adicionado: desativa hibernação/Fast Startup, indexação do Windows
@@ -245,7 +245,6 @@ $selectors = @(
 	'Microsoft.People';
 	'MicrosoftCorporationII.QuickAssist';
 	'Microsoft.SkypeApp';
-	'Microsoft.ScreenSketch';
 	'Microsoft.MicrosoftSolitaireCollection';
 	'Microsoft.MicrosoftStickyNotes';
 	'MicrosoftTeams';
@@ -313,7 +312,6 @@ $selectors = @(
 	'OpenSSH.Client';
 	'Microsoft.Windows.MSPaint';
 	'App.Support.QuickAssist';
-	'Microsoft.Windows.SnippingTool';
 	'App.StepsRecorder';
 	'Hello.Face.18967';
 	'Hello.Face.Migration.18967';
@@ -364,7 +362,6 @@ $logfile = 'C:\Windows\Setup\Scripts\RemoveCapabilities.log';
 		</File>
 		<File path="C:\Windows\Setup\Scripts\RemoveFeatures.ps1">
 $selectors = @(
-	'Microsoft-SnippingTool';
 );
 $getCommand = {
   Get-WindowsOptionalFeature -Online | Where-Object -Property 'State' -NotIn -Value @(
@@ -610,12 +607,7 @@ if( -not ( Test-ChromeInstalled ) ) {
 &lt;/DefaultAssociations&gt;
 		</File>
 		<File path="C:\Windows\Setup\Scripts\unattend-02.ps1">
-$out = &amp; "$env:windir\System32\powercfg.exe" /DuplicateScheme 'e9a42b02-d5df-448d-aa00-03f14749eb61';
-if( $out -match '\s([a-f0-9-]{36})\s' ) {
-    &amp; "$env:windir\System32\powercfg.exe" /SetActive $Matches[1];
-} else {
-    Write-Warning 'N&#xE3;o foi poss&#xED;vel habilitar o esquema de energia Ultimate Performance.';
-}
+&amp; "$env:windir\System32\powercfg.exe" /SetActive '8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c';
 		</File>
 		<File path="C:\Windows\Setup\Scripts\unattend-03.ps1">
 &lt;# Desempenho extra: hiberna&#xE7;&#xE3;o/Fast Startup, indexa&#xE7;&#xE3;o de busca, DiagTrack, SysMain,
@@ -667,11 +659,6 @@ reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\CloudContent" /v DisableTa
 reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /v EnableDynamicContentInWSB /t REG_DWORD /d 0 /f;
 reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection" /v DoNotShowFeedbackNotifications /t REG_DWORD /d 1 /f;
 
-reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /v BranchReadinessLevel /t REG_DWORD /d 32 /f;
-reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /v DeferFeatureUpdates /t REG_DWORD /d 1 /f;
-reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /v DeferFeatureUpdatesPeriodInDays /t REG_DWORD /d 60 /f;
-reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /v DeferQualityUpdates /t REG_DWORD /d 1 /f;
-reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" /v DeferQualityUpdatesPeriodInDays /t REG_DWORD /d 4 /f;
 
 $servicesToDisable = @(
 	'XblAuthManager';
@@ -819,14 +806,6 @@ $scripts = @(
 		net.exe accounts /maxpwage:UNLIMITED;
 	};
 	{
-		reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer" /v SmartScreenEnabled /t REG_SZ /d "Off" /f;
-		reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WTDS\Components" /v ServiceEnabled /t REG_DWORD /d 0 /f;
-		reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WTDS\Components" /v NotifyMalicious /t REG_DWORD /d 0 /f;
-		reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WTDS\Components" /v NotifyPasswordReuse /t REG_DWORD /d 0 /f;
-		reg.exe add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WTDS\Components" /v NotifyUnsafeApp /t REG_DWORD /d 0 /f;
-		reg.exe add "HKLM\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\Systray" /v HideSystray /t REG_DWORD /d 1 /f;
-	};
-	{
 		reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 1 /f;
 	};
 	{
@@ -850,9 +829,6 @@ $scripts = @(
 	};
 	{
 		reg.exe add "HKLM\Software\Policies\Microsoft\Windows\CloudContent" /v "DisableWindowsConsumerFeatures" /t REG_DWORD /d 1 /f;
-	};
-	{
-		reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\BitLocker" /v "PreventDeviceEncryption" /t REG_DWORD /d 1 /f;
 	};
 	{
 		reg.exe add "HKLM\Software\Policies\Microsoft\Edge" /v HideFirstRunExperience /t REG_DWORD /d 1 /f;
@@ -972,12 +948,6 @@ $scripts = @(
 	};
 	{
 		reg.exe add "HKU\DefaultUser\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "Hidden" /t REG_DWORD /d 1 /f;
-	};
-	{
-		reg.exe add "HKU\DefaultUser\Software\Microsoft\Edge\SmartScreenEnabled" /ve /t REG_DWORD /d 0 /f;
-		reg.exe add "HKU\DefaultUser\Software\Microsoft\Edge\SmartScreenPuaEnabled" /ve /t REG_DWORD /d 0 /f;
-		reg.exe add "HKU\DefaultUser\Software\Microsoft\Windows\CurrentVersion\AppHost" /v EnableWebContentEvaluation /t REG_DWORD /d 0 /f;
-		reg.exe add "HKU\DefaultUser\Software\Microsoft\Windows\CurrentVersion\AppHost" /v PreventOverride /t REG_DWORD /d 0 /f;
 	};
 	{
 		$names = @(
